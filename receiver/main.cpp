@@ -6,8 +6,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
-#if defined(WIN32) || defined(WIN64) || defined(__APPLE__)
-#else // Raspberry Pi
+#if defined(ENABLE_REAL_3D_LED_CUBE)
 #include "spi.h"
 #endif
 
@@ -47,10 +46,10 @@ int main(int argc, const char * argv[]) {
 				}
 			}
 		}
-#if defined(WIN32) || defined(WIN64) || defined(__APPLE__)
-		::ShowWindow("Receiver", m);
-#else // Respberry Pi
+#if defined(ENABLE_REAL_3D_LED_CUBE)
 		SendSpi(m);
+#else
+		::ShowWindow("Receiver", m);
 #endif
 	}
 	return 0;

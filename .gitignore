@@ -32,3 +32,5 @@
 
 # python
 *.pyc
+
+.DS_Store

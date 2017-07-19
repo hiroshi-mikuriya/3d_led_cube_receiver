@@ -1,13 +1,14 @@
-#include "base64.hpp"
 #include "port.h"
 #include "led.h"
-#include "show.hpp"
 #include <boost/asio.hpp>
+#include <boost/array.hpp>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 
 #if defined(ENABLE_REAL_3D_LED_CUBE)
 #include "spi.h"
+#else
+#include "show.hpp"
+#include <opencv2/opencv.hpp>
 #endif
 
 using namespace makerfaire::fxat;
@@ -22,26 +23,25 @@ int main(int argc, const char * argv[]) {
 	namespace asio = boost::asio;
 	namespace ip = asio::ip;
 	asio::io_service io_service;
-	ip::tcp::acceptor acceptor(io_service, ip::tcp::endpoint(ip::tcp::v4(), static_cast<ushort>(makerfaire::fxat::Port)));
+	ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), static_cast<ushort>(makerfaire::fxat::Port)));
 	std::cout << "Port:" << makerfaire::fxat::Port << std::endl;
 	for (;;){
-		ip::tcp::iostream s;
-		acceptor.accept(*s.rdbuf());
-		std::string msg;
-		std::stringstream ss;
-		decode(s, ss);
-		if (ss.str().size() != Led::Width*Led::Height*Led::Depth * 3) {
-			std::cerr << "size error : " << ss.str().size() << "\n" << ss.str() << std::endl;
+		boost::array<char, 32 * 1024> buf;
+        ip::udp::endpoint ep;
+        boost::system::error_code er;
+        size_t len = socket.receive_from(boost::asio::buffer(buf), ep, 0, er);
+        // Led::Width*Led::Height*Led::Depth
+		if (len != 8192) {
+			std::cerr << "size error : " << len << "\n" << std::endl;
 			continue;
 		}
 		int m[Led::Width][Led::Height][Led::Depth] = { 0 };
-		for (int x = 0; x < Led::Width; ++x){
+		for (int x = 0, i = 0; x < Led::Width; ++x){
 			for (int y = 0; y < Led::Height; ++y){
-				for (int z = 0; z < Led::Depth; ++z){
-					char r, g, b;
-					ss.get(r);
-					ss.get(g);
-					ss.get(b);
+				for (int z = 0; z < Led::Depth; ++z, ++i){
+                    char r = (buf[i * 2] & 0xF8);
+                    char g = ((buf[i * 2] & 0x07) << 5) + (((buf[i * 2 + 1] & 0xE0) >> 3));
+                    char b = (buf[i * 2 + 1] << 3);
 					m[x][y][z] = (lut[(std::uint8_t)r] << 16) + (lut[(std::uint8_t)g] << 8) + (lut[(std::uint8_t)b] << 0);
 				}
 			}

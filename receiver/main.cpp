@@ -47,9 +47,9 @@ template<size_t N>
 void add_history(ip::address const & address, boost::array<char, N> const & received, history_type & history)
 {
     packet_type packet(packet_size);
-    for(int i = 0; i < packet.size(); ++i)
+    for(int i = 0; i < packet.size(); ++i){
         packet[i] = received[i];
-    // std::copy(packet.data(), received.data(), packet.size());
+    }
     history[address] = std::make_pair(std::chrono::system_clock::now(), packet);
 }
 
@@ -59,7 +59,18 @@ void add_history(ip::address const & address, boost::array<char, N> const & rece
  */
 void erase_old_history(history_type & history)
 {
-    
+    auto now = std::chrono::system_clock::now();
+    std::vector<ip::address> erase_list;
+    for(auto it = history.begin(); it != history.end(); ++it){
+        auto time = it->second.first;
+        auto d = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(now - time).count());
+        if(time_limit_ms < d){
+            erase_list.push_back(it->first);
+        }
+    }
+    for(auto it = erase_list.begin(); it != erase_list.end(); ++it){
+        history.erase(*it);
+    }
 }
 
 /*!

@@ -1,10 +1,10 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <iostream>
-#include <bcm2835.h>
 
-namespace asio = boost::asio;
-namespace ip = asio::ip;
+#ifdef ENABLE_REAL_3D_LED_CUBE
+#include <bcm2835.h>
+#endif // ENABLE_REAL_3D_LED_CUBE
 
 namespace led {
     int const width = 16;
@@ -28,8 +28,6 @@ namespace led {
     };
 }
 
-
-
 namespace 
 {
     void convert(led::udp_buf_type const & u, led::spi_buf_type & s, led::LookupTable const & lut) {
@@ -51,6 +49,7 @@ namespace
     }
 
     void write_spi(led::spi_buf_type const & s) {
+#ifdef ENABLE_REAL_3D_LED_CUBE
         bcm2835_spi_begin();
         bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
         bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
@@ -59,18 +58,22 @@ namespace
         bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
         bcm2835_spi_writenb(const_cast<char*>(&s[0]), s.size());
         bcm2835_spi_end();
+#endif // ENABLE_REAL_3D_LED_CUBE
     }
 }
 
 int main(int argc, const char * argv[]) {
+#ifdef ENABLE_REAL_3D_LED_CUBE
     if (!bcm2835_init()){
         std::cerr << "failed to init bcm2835." << std::endl;
         return 1;
     }
+#endif // ENABLE_REAL_3D_LED_CUBE
+    namespace asio = boost::asio;
+    namespace ip = asio::ip;
     led::LookupTable const lut(0.6);
     asio::io_service io_service;
-    ushort const port = 9001;
-    ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), port));
+    ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), 9001));
     led::udp_buf_type udp_buf;
     led::spi_buf_type spi_buf;
     for (;;){

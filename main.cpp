@@ -58,7 +58,7 @@ namespace
         bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
         bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
         bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
-        bcm2835_spi_writenb(s.data(), s.size());
+        bcm2835_spi_writenb(const_cast<char*>(&s[0]), s.size());
         bcm2835_spi_end();
         bcm2835_close();
     }
@@ -67,7 +67,7 @@ namespace
 int main(int argc, const char * argv[]) {
     if (!bcm2835_init()){
         std::cerr << "failed to init bcm2835." << std::endl;
-        return;
+        return 1;
     }
     led::LookupTable lut;
     asio::io_service io_service;

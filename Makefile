@@ -22,7 +22,6 @@ LIBS      := -lpthread \
 	     -lboost_system \
 	     -lm
 ifeq ($(ENABLE_REAL_3D_LED_CUBE), true)
-SRCS := $(SRCS) spi.cpp
 LIBS := $(LIBS) -lbcm2835
 endif
 

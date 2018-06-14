@@ -24,7 +24,7 @@ namespace led {
         uint8_t m[256];
 
         LookupTable(double gamma) {
-            for (int ix = 0; ix < sizeof(m); ++ix){
+            for (size_t ix = 0; ix < sizeof(m); ++ix){
                 m[ix] = round(255 * pow(ix / 255.0, 1.0 / gamma));
             }
         }

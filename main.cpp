@@ -67,7 +67,7 @@ int main(int argc, const char * argv[]) {
         std::cerr << "failed to init bcm2835." << std::endl;
         return 1;
     }
-	led::LookupTable const lut(0.6);
+    led::LookupTable const lut(0.6);
     asio::io_service io_service;
     ushort const port = 9001;
     ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), port));

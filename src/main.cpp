@@ -1,10 +1,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <iostream>
-
-#if defined(ENABLE_REAL_3D_LED_CUBE)
-#include "spi.h"
-#endif
+#include <bcm2835.h>
 
 namespace asio = boost::asio;
 namespace ip = asio::ip;
@@ -55,7 +52,6 @@ namespace
     }
 
     void write_spi(led::spi_buf_type const & s) {
-        /*
         bcm2835_spi_begin();
         bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
         bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
@@ -65,21 +61,14 @@ namespace
         bcm2835_spi_writenb(s.data(), s.size());
         bcm2835_spi_end();
         bcm2835_close();
-
-
-        BCM.bcm2835_spi_begin
-        BCM.bcm2835_spi_setBitOrder(1) # MSB First
-        BCM.bcm2835_spi_setDataMode(0) # CPOL = 0, CPHA = 0
-        BCM.bcm2835_spi_setClockDivider(128)
-        BCM.bcm2835_spi_chipSelect(cs)
-        BCM.bcm2835_spi_setChipSelectPolarity(cs, 0) # LOW
-        BCM.bcm2835_spi_writenb(array, array.size)
-        BCM.bcm2835_spi_end
-        */
     }
 }
 
 int main(int argc, const char * argv[]) {
+    if (!bcm2835_init()){
+        std::cerr << "failed to init bcm2835." << std::endl;
+        return;
+    }
     led::LookupTable lut;
     asio::io_service io_service;
     ushort const port = 9001;

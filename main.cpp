@@ -20,8 +20,7 @@ namespace led {
     {
         uint8_t m[256];
 
-        LookupTable() {
-            double gamma = 0.6;
+        LookupTable(double gamma) {
             for (int ix = 0; ix < sizeof(m); ++ix){
                 m[ix] = round(255 * pow(ix / 255.0, 1.0 / gamma));
             }
@@ -68,7 +67,7 @@ int main(int argc, const char * argv[]) {
         std::cerr << "failed to init bcm2835." << std::endl;
         return 1;
     }
-    led::LookupTable lut;
+	led::LookupTable const lut(0.6);
     asio::io_service io_service;
     ushort const port = 9001;
     ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), port));

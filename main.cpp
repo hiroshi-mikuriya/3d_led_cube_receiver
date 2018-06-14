@@ -28,21 +28,18 @@ namespace led {
     };
 }
 
-namespace 
-{
+namespace {
     void convert(led::udp_buf_type const & u, led::spi_buf_type & s, led::LookupTable const & lut) {
         s[0] = 2;
         s[1] = s[2] = 0;
-        for (int x = 0, i = 0; x < led::width; ++x){
+        for (int x = 0; x < led::width; ++x){
             for (int y = 0; y < led::height; ++y){
-                for (int z = 0; z < led::depth; ++z, ++i){
-                    char r = lut.m[(u[i * 2] & 0xF8)];
-                    char g = lut.m[((u[i * 2] & 0x07) << 5) + (((u[i * 2 + 1] & 0xE0) >> 3))];
-                    char b = lut.m[(u[i * 2 + 1] << 3)];
+                for (int z = 0; z < led::depth; ++z){
+                    int i0 = (x * led::depth * led::height + y * led::depth + z) * 2;
                     int i1 = (z * led::width * led::height + y * led::width + x) * 3 + 3;
-                    s[i1] = r;
-                    s[i1 + 1] = g;
-                    s[i1 + 2] = b;
+                    s[i1] = lut.m[(u[i0] & 0xF8)]; // R
+                    s[i1 + 1] = lut.m[((u[i0] & 0x07) << 5) + (((u[i0 + 1] & 0xE0) >> 3))]; // G
+                    s[i1 + 2] = lut.m[(u[i0 + 1] << 3)]; // B
                 }
             }
         }

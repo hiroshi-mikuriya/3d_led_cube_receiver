@@ -14,10 +14,10 @@ namespace led {
     int const rgb24 = 24 / 8;
     int const spi_header_size = 3;
     int const udp_packet_size = width * height * depth * rgb565;
-    int const spi_write_size = width * height * depth * rgb24 + spi_header_size;
+    int const spi_packet_size = width * height * depth * rgb24 + spi_header_size;
 
     typedef boost::array<char, udp_packet_size * 2> udp_buf_type;
-    typedef boost::array<char, spi_write_size> spi_buf_type;
+    typedef boost::array<char, spi_packet_size> spi_buf_type;
 
     struct LookupTable
     {

@@ -10,8 +10,11 @@ namespace led {
     int const width = 16;
     int const height = 32;
     int const depth = 8;
-    int const udp_packet_size = width * height * depth * 2;
-    int const spi_write_size = width * height * depth * 3 + 3;
+    int const rgb565 = (5 + 6 + 5) / 8;
+    int const rgb24 = 24 / 8;
+    int const spi_header_size = 3;
+    int const udp_packet_size = width * height * depth * rgb565;
+    int const spi_write_size = width * height * depth * rgb24 + spi_header_size;
 
     typedef boost::array<char, udp_packet_size * 2> udp_buf_type;
     typedef boost::array<char, spi_write_size> spi_buf_type;
@@ -30,13 +33,13 @@ namespace led {
 
 namespace {
     void convert(led::udp_buf_type const & u, led::spi_buf_type & s, led::LookupTable const & lut) {
-        s[0] = 2;
-        s[1] = s[2] = 0;
+        s[0] = 2; // spi write command
+        s[1] = s[2] = 0; // spi address
         for (int x = 0; x < led::width; ++x){
             for (int y = 0; y < led::height; ++y){
                 for (int z = 0; z < led::depth; ++z){
-                    int i0 = (x * led::depth * led::height + y * led::depth + z) * 2;
-                    int i1 = (z * led::width * led::height + y * led::width + x) * 3 + 3;
+                    int i0 = (x * led::depth * led::height + y * led::depth + z) * led::rgb565;
+                    int i1 = (z * led::width * led::height + y * led::width + x) * led::rgb24 + led::spi_header_size;
                     s[i1] = lut.m[(u[i0] & 0xF8)]; // R
                     s[i1 + 1] = lut.m[((u[i0] & 0x07) << 5) + (((u[i0 + 1] & 0xE0) >> 3))]; // G
                     s[i1 + 2] = lut.m[(u[i0 + 1] << 3)]; // B

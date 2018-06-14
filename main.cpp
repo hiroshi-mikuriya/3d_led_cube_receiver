@@ -60,7 +60,6 @@ namespace
         bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
         bcm2835_spi_writenb(const_cast<char*>(&s[0]), s.size());
         bcm2835_spi_end();
-        bcm2835_close();
     }
 }
 

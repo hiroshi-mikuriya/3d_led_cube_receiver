@@ -38,11 +38,11 @@ namespace {
         for (int x = 0; x < led::width; ++x){
             for (int y = 0; y < led::height; ++y){
                 for (int z = 0; z < led::depth; ++z){
-                    int i0 = (x * led::depth * led::height + y * led::depth + z) * led::rgb565;
-                    int i1 = (z * led::width * led::height + y * led::width + x) * led::rgb24 + led::spi_header_size;
+                    int i0 = ((x * led::height + y) * led::depth + z) * led::rgb565;
+                    int i1 = ((z * led::height + y) * led::width + x) * led::rgb24 + led::spi_header_size;
                     s[i1] = lut.m[(u[i0] & 0xF8)]; // R
                     s[i1 + 1] = lut.m[((u[i0] & 0x07) << 5) + (((u[i0 + 1] & 0xE0) >> 3))]; // G
-                    s[i1 + 2] = lut.m[(u[i0 + 1] << 3)]; // B
+                    s[i1 + 2] = lut.m[(u[i0 + 1] & 0x1F) << 3]; // B
                 }
             }
         }

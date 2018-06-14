@@ -14,7 +14,7 @@ CXXFLAGS  := -Wall -std=c++0x -v $(CXXDEFS)
 
 TARGET    := receiver
 PROJ_ROOT := $(realpath ..)
-VPATH     := $(PROJ_ROOT)/src
+VPATH     := $(PROJ_ROOT)
 INCLUDES  := `pkg-config opencv --cflags`
 SRCS      := main.cpp
 LIBS      := -lpthread \

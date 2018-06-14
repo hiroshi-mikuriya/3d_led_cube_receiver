@@ -1,5 +1,3 @@
-#include "port.h"
-#include "led.h"
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <iostream>
@@ -8,12 +6,8 @@
 
 #if defined(ENABLE_REAL_3D_LED_CUBE)
 #include "spi.h"
-#else
-#include "show.hpp"
-#include <opencv2/opencv.hpp>
 #endif
 
-using namespace makerfaire::fxat;
 namespace asio = boost::asio;
 namespace ip = asio::ip;
 
@@ -87,10 +81,10 @@ void send_led(history_type const & history, uint8_t const (&lut)[lut_size])
             packet[i] = std::max(packet[i], it->second.second[i]);
         }
     }
-    int m[Led::Width][Led::Height][Led::Depth] = { 0 };
-    for (int x = 0, i = 0; x < Led::Width; ++x){
-        for (int y = 0; y < Led::Height; ++y){
-            for (int z = 0; z < Led::Depth; ++z, ++i){
+    int m[16][32][8] = { 0 };
+    for (int x = 0, i = 0; x < 16; ++x){
+        for (int y = 0; y < 32; ++y){
+            for (int z = 0; z < 8; ++z, ++i){
                 char r = (packet[i * 2] & 0xF8);
                 char g = ((packet[i * 2] & 0x07) << 5) + (((packet[i * 2 + 1] & 0xE0) >> 3));
                 char b = (packet[i * 2 + 1] << 3);
@@ -100,8 +94,6 @@ void send_led(history_type const & history, uint8_t const (&lut)[lut_size])
     }
 #if defined(ENABLE_REAL_3D_LED_CUBE)
     SendSpi(m);
-#else
-    ::ShowWindow("Receiver", m);
 #endif
 }
 
@@ -124,8 +116,8 @@ int main(int argc, const char * argv[]) {
     history_type history;
     
     asio::io_service io_service;
-    ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), static_cast<ushort>(makerfaire::fxat::Port)));
-    std::cout << "Port:" << makerfaire::fxat::Port << std::endl;
+    ushort const port = 9001;
+    ip::udp::socket socket(io_service, ip::udp::endpoint(ip::udp::v4(), port));
     for (;;){
         boost::array<char, packet_size * 4> buf;
         ip::udp::endpoint ep;

@@ -19,8 +19,6 @@ INCLUDES  := `pkg-config opencv --cflags`
 SRCS      := main.cpp
 LIBS      := -lpthread \
 	     -ldl \
-	     `pkg-config opencv --libs` \
-	     -lboost_serialization \
 	     -lboost_system \
 	     -lm
 ifeq ($(ENABLE_REAL_3D_LED_CUBE), true)

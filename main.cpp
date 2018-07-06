@@ -4,6 +4,8 @@
 
 #ifdef ENABLE_REAL_3D_LED_CUBE
 #include <bcm2835.h>
+#else
+#include "loadLibrary.hpp"
 #endif // ENABLE_REAL_3D_LED_CUBE
 
 namespace led {
@@ -43,6 +45,10 @@ namespace {
                     s[i1] = lut.m[(u[i0] & 0xF8)]; // R
                     s[i1 + 1] = lut.m[((u[i0] & 0x07) << 5) + (((u[i0 + 1] & 0xE0) >> 3))]; // G
                     s[i1 + 2] = lut.m[(u[i0 + 1] & 0x1F) << 3]; // B
+#ifndef ENABLE_REAL_3D_LED_CUBE
+                    int color = (s[i1] << 16) + (s[i1 + 1] << 8) + s[i1 + 2];
+                    SetLed(x, y, z, color);
+#endif // ENABLE_REAL_3D_LED_CUBE
                 }
             }
         }
@@ -58,6 +64,8 @@ namespace {
         bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
         bcm2835_spi_writenb(const_cast<char*>(&s[0]), s.size());
         bcm2835_spi_end();
+#else
+        Show();
 #endif // ENABLE_REAL_3D_LED_CUBE
     }
 }
@@ -80,6 +88,7 @@ int main(int argc, const char * argv[]) {
         ip::udp::endpoint ep;
         boost::system::error_code er;
         size_t len = socket.receive_from(boost::asio::buffer(udp_buf), ep, 0, er);
+        std::cout << len << std::endl;
         if (len != led::udp_packet_size) {
             std::cerr << "size error : " << len << "\n" << std::endl;
             continue;

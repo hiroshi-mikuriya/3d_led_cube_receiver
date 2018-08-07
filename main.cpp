@@ -56,14 +56,10 @@ namespace {
 
     void write_spi(led::spi_buf_type const & s) {
 #ifdef ENABLE_REAL_3D_LED_CUBE
-        bcm2835_spi_begin();
-        bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
-        bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
-        bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
         bcm2835_spi_chipSelect(BCM2835_SPI_CS0);
-        bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, LOW);
+        bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, 0);
         bcm2835_spi_writenb(const_cast<char*>(&s[0]), s.size());
-        bcm2835_spi_end();
+        bcm2835_spi_setChipSelectPolarity(BCM2835_SPI_CS0, 1);
 #else
         Show();
 #endif // ENABLE_REAL_3D_LED_CUBE
@@ -76,6 +72,10 @@ int main(int argc, const char * argv[]) {
         std::cerr << "failed to init bcm2835." << std::endl;
         return 1;
     }
+    bcm2835_spi_begin();
+    bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
+    bcm2835_spi_setDataMode(BCM2835_SPI_MODE0);
+    bcm2835_spi_setClockDivider(BCM2835_SPI_CLOCK_DIVIDER_64);
 #endif // ENABLE_REAL_3D_LED_CUBE
     namespace asio = boost::asio;
     namespace ip = asio::ip;
